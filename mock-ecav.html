@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock ECAV - École d'avocature - Inscription</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+        .header {
+            background-color: #0066cc;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #0066cc;
+            border-bottom: 2px solid #0066cc;
+            padding-bottom: 10px;
+        }
+        .registration-status {
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 18px;
+        }
+        .closed {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+        .open {
+            background-color: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffeaa7;
+        }
+        .control-panel {
+            background-color: #e8f4f8;
+            border: 2px solid #17a2b8;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 30px 0;
+        }
+        .control-panel h3 {
+            color: #17a2b8;
+            margin-top: 0;
+        }
+        button {
+            background-color: #17a2b8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #138496;
+        }
+        .exam-info {
+            background-color: #f8f9fa;
+            border-left: 4px solid #0066cc;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .fees {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .documents {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .form-button {
+            background-color: #28a745;
+            color: white;
+            padding: 15px 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto;
+            text-decoration: none;
+            text-align: center;
+        }
+        .form-button:hover {
+            background-color: #218838;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Université de Genève - École d'avocature (ECAV)</h1>
+        <p>Inscription à l'examen final - Brevet d'avocat-e</p>
+    </div>
+
+    <div class="container">
+        <div class="control-panel">
+            <h3>🛠️ Contrôles de Test (Simulateur)</h3>
+            <p>Utilisez ces boutons pour simuler l'ouverture/fermeture des inscriptions :</p>
+            <button onclick="openRegistration()">✅ Ouvrir les inscriptions</button>
+            <button onclick="closeRegistration()">❌ Fermer les inscriptions</button>
+            <button onclick="setWarning()">⚠️ Inscriptions bientôt ouvertes</button>
+            <button onclick="resetToOriginal()">🔄 État original</button>
+        </div>
+
+        <h1>Brevet d'avocat-e - Inscription</h1>
+
+        <div id="registrationStatus" class="registration-status closed">
+            ❌ Les inscriptions sont fermées.
+        </div>
+
+        <div class="exam-info">
+            <h3>Prochaine session d'examen</h3>
+            <p><strong>Date :</strong> Mercredi 8 octobre 2025</p>
+            <p><strong>Période d'inscription :</strong> <span id="inscriptionPeriod">Du 18 août au 8 septembre 2025</span></p>
+        </div>
+
+        <div id="openRegistrationContent" class="hidden">
+            <div class="registration-status open">
+                ✅ Les inscriptions sont ouvertes !
+            </div>
+            
+            <a href="#" class="form-button" onclick="alert('Formulaire d\'inscription (simulation)')">
+                📝 Formulaire d'inscription en ligne
+            </a>
+            
+            <div class="warning">
+                <strong>Attention :</strong> Le formulaire d'inscription doit être retourné accompagné des pièces requises, uniquement par courrier recommandé ou par courrier A+, au plus tard le 8 septembre 2025.
+            </div>
+        </div>
+
+        <div id="warningContent" class="hidden">
+            <div class="registration-status warning">
+                ⚠️ Les inscriptions ouvriront bientôt. Préparez vos documents !
+            </div>
+        </div>
+
+        <div class="fees">
+            <h3>💰 Frais d'inscription</h3>
+            <p>Les frais d'inscription à l'examen s'élèvent à <strong>CHF 500.-</strong> (art. 31, al. 3, RPAv).</p>
+        </div>
+
+        <div class="documents">
+            <h3>📋 Documents à fournir</h3>
+            <ul>
+                <li>10 attestations originales de conférences (art. 13, let. c, RPAv)</li>
+                <li>2 attestations originales de participation active aux audiences</li>
+                <li>2 attestations originales de plaidoirie (art. 13, let. e, RPAv)</li>
+                <li>Attestation(s) originale(s) relative(s) à l'avancement du stage</li>
+                <li>Copie du procès-verbal de notes de l'examen approfondi de l'ECAV</li>
+                <li>Copie de l'arrêté du Conseil d'État autorisant la prestation de serment</li>
+                <li>Copie de la Maîtrise universitaire en droit</li>
+            </ul>
+        </div>
+
+        <div class="exam-info">
+            <h3>📧 Contact</h3>
+            <p><strong>Email :</strong> secretu-ecav@unige.ch</p>
+            <p><strong>Adresse :</strong> École d'avocature (ECAV)<br>
+            Université de Genève<br>
+            40, bd du Pont-d'Arve - CH 1211 GENÈVE 4</p>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px; padding: 20px; background-color: #f8f9fa; border-radius: 5px;">
+            <p><strong>Page mise à jour le :</strong> <span id="lastUpdate"></span></p>
+            <p><small>Cette page est une simulation pour tester le moniteur de changements</small></p>
+        </div>
+    </div>
+
+    <script>
+        function updateTimestamp() {
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleString('fr-CH');
+        }
+
+        function openRegistration() {
+            // Hide all status divs
+            document.getElementById('registrationStatus').classList.add('hidden');
+            document.getElementById('warningContent').classList.add('hidden');
+            
+            // Show open registration content
+            document.getElementById('openRegistrationContent').classList.remove('hidden');
+            
+            // Update period text
+            document.getElementById('inscriptionPeriod').textContent = 'Ouvertes maintenant !';
+            
+            updateTimestamp();
+            
+            // Trigger a significant content change that monitors can detect
+            document.title = 'ECAV - Inscriptions OUVERTES !';
+            
+            // Add a noticeable element to increase content size
+            const alertDiv = document.createElement('div');
+            alertDiv.id = 'registrationOpenAlert';
+            alertDiv.style.cssText = 'background: #28a745; color: white; padding: 20px; margin: 20px 0; text-align: center; font-size: 20px; font-weight: bold;';
+            alertDiv.innerHTML = '🎉 INSCRIPTIONS MAINTENANT OUVERTES! Formulaire disponible ci-dessous 🎉';
+            document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.exam-info'));
+            
+            console.log('Registration opened - significant content change triggered');
+        }
+
+        function closeRegistration() {
+            // Remove the alert div if it exists
+            const alertDiv = document.getElementById('registrationOpenAlert');
+            if (alertDiv) {
+                alertDiv.remove();
+            }
+            
+            // Hide open registration content
+            document.getElementById('openRegistrationContent').classList.add('hidden');
+            document.getElementById('warningContent').classList.add('hidden');
+            
+            // Show closed status
+            document.getElementById('registrationStatus').classList.remove('hidden');
+            document.getElementById('registrationStatus').className = 'registration-status closed';
+            document.getElementById('registrationStatus').innerHTML = '❌ Les inscriptions sont fermées.';
+            
+            // Reset period text
+            document.getElementById('inscriptionPeriod').textContent = 'Du 18 août au 8 septembre 2025';
+            
+            updateTimestamp();
+            document.title = 'Mock ECAV - École d\'avocature - Inscription';
+            
+            console.log('Registration closed - content reverted');
+        }
+
+        function setWarning() {
+            // Hide other content
+            document.getElementById('registrationStatus').classList.add('hidden');
+            document.getElementById('openRegistrationContent').classList.add('hidden');
+            
+            // Show warning
+            document.getElementById('warningContent').classList.remove('hidden');
+            
+            updateTimestamp();
+            document.title = 'ECAV - Inscriptions bientôt ouvertes';
+        }
+
+        function resetToOriginal() {
+            closeRegistration();
+        }
+
+        // Initialize page
+        updateTimestamp();
+        
+        // Auto-refresh timestamp every 30 seconds to simulate minor updates
+        setInterval(updateTimestamp, 30000);
+    </script>
+</body>
+</html>

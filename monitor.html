@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Monitor - ECAV Registration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5; /* fixed corrupted line */
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .control-panel {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        label {
+            font-weight: bold;
+            color: #34495e;
+        }
+        input[type="url"], input[type="number"] {
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .start-btn {
+            background-color: #27ae60;
+            color: white;
+        }
+        .start-btn:hover {
+            background-color: #229954;
+        }
+        .stop-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .stop-btn:hover {
+            background-color: #c0392b;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .status.monitoring {
+            background-color: #d5f4e6;
+            color: #27ae60;
+            border: 2px solid #27ae60;
+        }
+        .status.stopped {
+            background-color: #fadbd8;
+            color: #e74c3c;
+            border: 2px solid #e74c3c;
+        }
+        .status.change-detected {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffc107;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+        .log-entry.info {
+            color: #17a2b8;
+        }
+        .log-entry.success {
+            color: #28a745;
+        }
+        .log-entry.warning {
+            color: #ffc107;
+        }
+        .log-entry.error {
+            color: #dc3545;
+        }
+        .change-alert {
+            background-color: #fff3cd;
+            border: 2px solid #ffc107;
+            color: #856404;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .hidden {
+            display: none;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        .test-section {
+            background-color: #e8f4f8;
+            border: 2px solid #17a2b8;
+            border-radius: 5px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        .test-section h3 {
+            color: #17a2b8;
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚨 ECAV Registration Monitor</h1>
+        
+    <div class="control-panel">
+            <div class="input-group">
+                <label for="url">Website URL:</label>
+                <input type="url" id="url" value="https://www.unige.ch/droit/ecav/examen-final/inscription" placeholder="Enter website URL">
+            </div>
+            
+            <div class="input-group">
+                <label for="interval">Check Interval (ms):</label>
+                <input type="number" id="interval" value="5000" min="1000" max="60000" placeholder="5000">
+            </div>
+            
+            <div class="input-group">
+                <label for="minChange">Min Change Size:</label>
+                <input type="number" id="minChange" value="10" min="1" max="1000" placeholder="10" title="Ignore changes smaller than this many characters">
+            </div>
+            <div class="input-group" style="min-width:220px;">
+                <label for="watchKeywords" style="font-weight:normal;">Watch Keywords (comma)</label>
+                <input type="text" id="watchKeywords" placeholder="ouvert, formulaire, inscriptions">
+            </div>
+            <div class="input-group" style="max-width:170px;">
+                <label style="font-weight:normal;display:flex;gap:6px;align-items:center;">
+                    <input type="checkbox" id="renderMode"> Rendered DOM
+                </label>
+                <small style="font-size:10px;color:#555;line-height:1.1;">Capture JS mutations (same-origin only)</small>
+            </div>
+            
+            <button id="startBtn" class="start-btn">🎯 Start Monitoring</button>
+            <button id="stopBtn" class="stop-btn hidden">⏹️ Stop</button>
+            <button onclick="testAlert()" style="background-color: #ffc107; color: #212529; margin-left: 10px;">🔊 Test Alert Sound</button>
+            <button onclick="debugContent()" style="background-color: #6c757d; color: white; margin-left: 10px;">🔍 Debug Content</button>
+            <button onclick="openMock()" style="background-color:#17a2b8;color:#fff;">🧪 Open Mock Site</button>
+        </div>
+        
+        <div id="status" class="status stopped">
+            ⏸️ Monitoring Stopped - Ready to start
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="checkCount">0</div>
+                <div class="stat-label">Checks Performed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="runtime">00:00:00</div>
+                <div class="stat-label">Runtime</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="lastCheck">Never</div>
+                <div class="stat-label">Last Check</div>
+            </div>
+        </div>
+        
+        <div id="changeAlert" class="change-alert hidden"></div>
+
+        <div id="diffContainer" class="hidden" style="background:#eef; border:1px solid #99c; padding:15px; border-radius:6px; font-family:monospace; white-space:pre-wrap; max-height:300px; overflow:auto; margin:15px 0;">
+            <strong>Diff snippet (first change window):</strong>
+            <div id="diffSnippet" style="margin-top:8px;font-size:12px;line-height:1.3;"></div>
+        </div>
+        
+        <h3>📋 Activity Log</h3>
+        <div id="log" class="log">
+            <div class="log-entry info">[Ready] Monitor initialized and ready to start</div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🧪 Test with Mock Website</h3>
+            <p>To test this monitor, you can use the mock website that simulates the registration opening:</p>
+            <button onclick="window.open('./mock-ecav.html', '_blank')" style="background-color: #17a2b8; color: white;">
+                🌐 Open Mock ECAV Website
+            </button>
+            <p><small>The mock website has a button to simulate registration opening/closing for testing purposes.</small></p>
+            <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+                <button style="background:#6c757d;" onclick="setServerState('closed')">Server Closed</button>
+                <button style="background:#ffc107;color:#212529;" onclick="setServerState('warning')">Server Warning</button>
+                <button style="background:#28a745;" onclick="setServerState('open')">Server Open</button>
+                <button style="background:#007bff;" onclick="cycleServerState()">Cycle State</button>
+            </div>
+            <p style="margin:6px 0 0 0;font-size:11px;color:#555;">Server state forces actual HTML differences so the monitor always detects changes (no reliance on client JS).</p>
+            <p style="margin:4px 0 0 0;font-size:11px;color:#555;">Current server state: <span id="serverStateDisplay">?</span></p>
+        </div>
+
+        <div class="test-section" style="background-color: #fff3cd; border-color: #ffc107;">
+            <h3>🔧 Monitor Real Websites (CORS Bypass)</h3>
+            <p>To monitor external websites like the real ECAV site, you need to run the proxy server:</p>
+            <ol>
+                <li>Open PowerShell/Command Prompt in this folder</li>
+                <li>Run: <code style="background: #f8f9fa; padding: 2px 6px; border-radius: 3px;">node proxy-server.js</code></li>
+                <li>Keep the proxy server running while monitoring</li>
+                <li>The monitor will automatically use the proxy when available</li>
+            </ol>
+            <p><strong>Without the proxy server:</strong> The monitor will use simulation mode for external URLs (like it's doing now).</p>
+            <p><strong>With the proxy server:</strong> The monitor will fetch the actual website content and detect real changes!</p>
+        </div>
+
+        <div class="test-section" style="background-color: #f8d7da; border-color: #dc3545;">
+            <h3>🔊 Audio Troubleshooting</h3>
+            <p><strong>No sound?</strong> Try these steps:</p>
+            <ol>
+                <li><strong>Check browser volume</strong> - Ensure it's not muted</li>
+                <li><strong>Check system volume</strong> - Make sure Windows/system audio is on</li>
+                <li><strong>Allow audio permissions</strong> - Click "Test Alert Sound" to enable audio</li>
+                <li><strong>Try different browser</strong> - Chrome/Edge usually work best</li>
+                <li><strong>Refresh page</strong> - If audio fails, try refreshing and testing again</li>
+            </ol>
+            <p><strong>Sound type:</strong> Simple 800Hz beep (0.5 seconds) - similar to system notification sounds.</p>
+        </div>
+    </div>
+
+    <script>
+        let monitorInterval;
+        let isMonitoring = false;
+    let previousContent = '';
+    let previousHash = '';
+        let checkCount = 0;
+        let startTime;
+        let runtimeInterval;
+
+        const elements = {
+            url: document.getElementById('url'),
+            interval: document.getElementById('interval'),
+            minChange: document.getElementById('minChange'),
+            startBtn: document.getElementById('startBtn'),
+            stopBtn: document.getElementById('stopBtn'),
+            status: document.getElementById('status'),
+            log: document.getElementById('log'),
+            changeAlert: document.getElementById('changeAlert'),
+            checkCount: document.getElementById('checkCount'),
+            runtime: document.getElementById('runtime'),
+            lastCheck: document.getElementById('lastCheck'),
+            diffContainer: document.getElementById('diffContainer'),
+            diffSnippet: document.getElementById('diffSnippet'),
+            renderMode: document.getElementById('renderMode')
+        };
+        let renderIframe = null;
+        let iframeLoaded = false;
+
+        // Patterns to strip / ignore (dynamic timestamps etc.) – customize if needed
+        const IGNORED_PATTERNS = [
+            /\d{1,2}[:h]\d{2}:\d{2}/g, // times like 12:34:56 or 12h34:56
+            /\d{1,2} [A-Za-zéû]+ 20\d{2}/g, // dates like 8 octobre 2025
+            /Last-Modified:[^\n]+/gi,
+        ];
+    const DEFAULT_KEYWORDS = [
+            'inscriptions sont ouvertes',
+            'inscriptions sont ouvertes',
+            '✅ Les inscriptions sont ouvertes',
+            'INSCRIPTIONS MAINTENANT OUVERTES',
+            'Les inscriptions sont ouvertes',
+            'inscriptions ouvriront bientôt'
+        ].map(k=>k.toLowerCase());
+
+        function normalizeContent(raw) {
+            let c = raw.replace(/\r/g, '')
+                .replace(/\s+/g, ' ') // collapse whitespace
+                .trim();
+            IGNORED_PATTERNS.forEach(p => c = c.replace(p, ''));            
+            return c;
+        }
+
+        async function sha256(text) {
+            const enc = new TextEncoder().encode(text);
+            const digest = await crypto.subtle.digest('SHA-256', enc);
+            return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2,'0')).join('');
+        }
+
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            elements.log.appendChild(logEntry);
+            elements.log.scrollTop = elements.log.scrollHeight;
+        }
+
+        function updateRuntime() {
+            if (!startTime) return;
+            const elapsed = Date.now() - startTime;
+            const hours = Math.floor(elapsed / 3600000);
+            const minutes = Math.floor((elapsed % 3600000) / 60000);
+            const seconds = Math.floor((elapsed % 60000) / 1000);
+            elements.runtime.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+    async function checkWebsite() {
+            try {
+                elements.lastCheck.textContent = new Date().toLocaleTimeString();
+                
+                const url = elements.url.value;
+
+                // Rendered DOM mode for same-origin pages (e.g., mock site)
+                if (elements.renderMode.checked) {
+                    if (!url.startsWith(location.origin)) {
+                        addLog('Rendered DOM mode requires same-origin; falling back to source HTML', 'warning');
+                    } else {
+                        if (!renderIframe) {
+                            renderIframe = document.createElement('iframe');
+                            renderIframe.style.position = 'fixed';
+                            renderIframe.style.left = '-9999px';
+                            renderIframe.style.top = '-9999px';
+                            renderIframe.setAttribute('sandbox','allow-scripts allow-same-origin');
+                            renderIframe.addEventListener('load', () => { iframeLoaded = true; });
+                            document.body.appendChild(renderIframe);
+                        }
+                        const sep = url.includes('?') ? '&' : '?';
+                        renderIframe.src = url + sep + '_rdm=' + Date.now();
+                        const html = await new Promise(resolve => {
+                            const start = Date.now();
+                            const grab = () => {
+                                if (iframeLoaded && renderIframe.contentDocument) {
+                                    resolve(renderIframe.contentDocument.documentElement.innerHTML);
+                                } else if (Date.now() - start > 2000) {
+                                    resolve('');
+                                } else {
+                                    setTimeout(grab, 120);
+                                }
+                            };
+                            setTimeout(grab, 160);
+                        });
+                        if (html) {
+                            addLog(`🔁 Captured rendered DOM (${html.length} chars)`, 'success');
+                            return checkForChanges(html, url);
+                        } else {
+                            addLog('Rendered DOM empty, fallback to raw fetch', 'warning');
+                        }
+                    }
+                }
+                
+                // Check if it's a local file or localhost
+                if (url.includes('localhost') || url.includes('127.0.0.1') || url.includes('mock-ecav.html') || url.includes('test-website.html') || url.startsWith('./') || url.includes('file://')) {
+                    // For local testing - direct fetch with aggressive cache busting
+                    const separator = url.includes('?') ? '&' : '?';
+                    const cacheBuster = `${separator}_t=${Date.now()}&_r=${Math.random()}&_check=${checkCount}`;
+                    const fetchUrl = url + cacheBuster;
+                    addLog(`Fetching local URL: ${url}`, 'info');
+                    
+                    const response = await fetch(fetchUrl, {
+                        method: 'GET',
+                        cache: 'no-store',
+                        headers: {
+                            'Cache-Control': 'no-cache, no-store, must-revalidate',
+                            'Pragma': 'no-cache',
+                            'Expires': '0'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    const content = await response.text();
+                    addLog(`✅ Fetched ${content.length} chars (local)`, 'success');
+                    return checkForChanges(content, url);
+                } else {
+                    // For external websites, try to use proxy server first
+                    return await checkWithProxy(url);
+                }
+                
+            } catch (error) {
+                addLog(`❌ Error checking website: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+    async function checkWithProxy(targetUrl) {
+            const proxyUrl = `http://localhost:3001/?url=${encodeURIComponent(targetUrl)}`;
+            
+            try {
+                // First, test if proxy server is running
+        const response = await fetch(proxyUrl, { cache: 'no-store' });
+                
+                if (response.ok) {
+            const content = await response.text();
+            addLog(`🌐 Via proxy: ${content.length} chars`, 'success');
+            return checkForChanges(content, targetUrl);
+                } else {
+                    throw new Error(`Proxy returned status ${response.status}`);
+                }
+                
+            } catch (error) {
+                // If proxy fails, fall back to simulation mode
+                if (error.message.includes('fetch')) {
+                    addLog('Proxy server not available - start proxy-server.js for real monitoring', 'warning');
+                    addLog('Falling back to simulation mode', 'info');
+                } else {
+                    addLog(`Proxy error: ${error.message}`, 'warning');
+                }
+                
+                simulateCheck();
+                return false;
+            }
+        }
+
+        function simulateCheck() {
+            // Simulate random changes for demo purposes
+            if (Math.random() < 0.05) { // 5% chance of detecting a "change"
+                handleChangeDetected('Simulated change detected (demo mode)');
+                return true;
+            }
+            addLog('Website checked - no changes detected', 'info');
+            return false;
+        }
+
+        async function checkForChanges(rawContent, source) {
+            const normalized = normalizeContent(rawContent);
+            const hash = await sha256(normalized);
+            const size = normalized.length;
+
+            if (!previousContent) {
+                previousContent = normalized;
+                previousHash = hash;
+                addLog(`Baseline captured: size=${size} hash=${hash.substring(0,12)}…`, 'info');
+                return false;
+            }
+
+            if (hash === previousHash) {
+                addLog(`No change (size=${size}, hash prefix=${hash.substring(0,8)})`, 'info');
+                return false;
+            }
+
+            const oldSize = previousContent.length;
+            const sizeDiff = size - oldSize;
+            const minChange = parseInt(elements.minChange?.value || 10, 10);
+            addLog(`Δ Hash mismatch old=${previousHash.substring(0,12)} new=${hash.substring(0,12)} sizeΔ=${sizeDiff}`, 'warning');
+
+            // Keyword presence triggers alert regardless of size threshold if newly appeared
+            const lowered = normalized.toLowerCase();
+            const oldLower = previousContent.toLowerCase();
+            const userKeywordsRaw = (elements.watchKeywords?.value || '').split(',').map(s=>s.trim()).filter(Boolean);
+            const dynamicKeywords = DEFAULT_KEYWORDS.concat(userKeywordsRaw.map(k=>k.toLowerCase()));
+            let triggeredKeyword = null;
+            for (const kw of dynamicKeywords) {
+                if (!oldLower.includes(kw) && lowered.includes(kw)) { triggeredKeyword = kw; break; }
+            }
+            const keywordTriggered = !!triggeredKeyword;
+
+            if (Math.abs(sizeDiff) < minChange && !keywordTriggered) {
+                addLog(`Change below threshold (${Math.abs(sizeDiff)} < ${minChange}) – updating baseline (no keyword)`, 'info');
+                previousContent = normalized;
+                previousHash = hash;
+                return false;
+            }
+
+            const snippet = computeDiffSnippet(previousContent, normalized);
+            if (snippet) {
+                elements.diffSnippet.innerHTML = snippet;
+                elements.diffContainer.classList.remove('hidden');
+            }
+            const extra = keywordTriggered ? ` [keyword:${triggeredKeyword}]` : '';
+            if (keywordTriggered) addLog(`Keyword appeared: "${triggeredKeyword}"`, 'success');
+            handleChangeDetected(`Content changed (Δ${sizeDiff} chars)${extra}` , { oldSize, newSize: size, oldHash: previousHash, newHash: hash, source, keywordTriggered, triggeredKeyword });
+            previousContent = normalized;
+            previousHash = hash;
+            return true;
+        }
+
+        function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));}
+
+        function computeDiffSnippet(a,b){
+            const maxContext = 120; // chars around first diff
+            let i=0; while(i < a.length && i < b.length && a[i]===b[i]) i++;
+            if(i===a.length && i===b.length) return '';
+            let j=0; while(j < a.length-i && j < b.length-i && a[a.length-1-j]===b[b.length-1-j]) j++;
+            const aMid = a.substring(i, a.length-j);
+            const bMid = b.substring(i, b.length-j);
+            const contextStart = Math.max(0, i - maxContext/2);
+            const contextEndOld = Math.min(a.length, i + aMid.length + maxContext/2);
+            const contextEndNew = Math.min(b.length, i + bMid.length + maxContext/2);
+            const oldSnippet = a.substring(contextStart, contextEndOld);
+            const newSnippet = b.substring(contextStart, contextEndNew);
+            return `<div style="color:#b00;">OLD: ${escapeHtml(oldSnippet)}</div><div style="color:#060;">NEW: ${escapeHtml(newSnippet)}</div>`;
+        }
+
+        function handleChangeDetected(message, meta = {}) {
+            addLog(`🚨 ALERT: ${message}`, 'warning');
+            elements.changeAlert.innerHTML = `🎉 <strong>CHANGE DETECTED!</strong><br>${escapeHtml(message)}<br>` +
+                (meta.oldSize !== undefined ? `<small>Old size ${meta.oldSize} → New size ${meta.newSize} | Hash ${meta.oldHash?.substring(0,12)} → ${meta.newHash?.substring(0,12)}</small>` : '');
+            elements.changeAlert.classList.remove('hidden');
+            elements.status.className = 'status change-detected';
+            elements.status.innerHTML = `🚨 CHANGE DETECTED! ${message}`;
+            
+            // Play multiple types of alert sounds for better compatibility
+            playAlertSound();
+            
+            // Show browser notification if permission granted
+            if (Notification.permission === 'granted') {
+                new Notification('Change Detected', {
+                    body: message,
+                    icon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDQgOUwxMC45MSA4LjI2TDEyIDJaIiBmaWxsPSIjRkZDMTA3Ii8+Cjwvc3ZnPg=='
+                });
+            }
+        }
+
+    function playAlertSound() {
+            // Simple, reliable audio using HTML5 Audio API
+            try {
+                // Create a simple beep sound - more reliable than Web Audio API
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Simple single beep
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+        oscillator.type = 'square';
+        oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+        gainNode.gain.setValueAtTime(0.0001,audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.3,audioContext.currentTime+0.02);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001,audioContext.currentTime+0.7);
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime+0.7);
+                
+                addLog('🔊 Alert sound played', 'success');
+                
+            } catch (e) {
+                // Fallback to the original simple method
+                try {
+                    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQaAEeR2O/LdSIFJHfJ8NyLPAkTXbXs651PEA5RpuT1s2AdBDWR2OzLdSMGI3fH8NyLPQkTXbXt6Z5PFY5f');
+                    audio.volume = 0.8;
+                    audio.play().then(() => {
+                        addLog('� Alert sound played (fallback)', 'success');
+                    }).catch(() => {
+                        addLog('Sound blocked by browser - enable audio permissions', 'warning');
+                    });
+                } catch (e2) {
+                    addLog('Audio not available', 'warning');
+                }
+            }
+        }
+
+        function startMonitoring() {
+            if (isMonitoring) return;
+            
+            const url = elements.url.value;
+            const interval = parseInt(elements.interval.value);
+            
+            if (!url) {
+                alert('Please enter a website URL');
+                return;
+            }
+            
+            if (interval < 1000) {
+                alert('Interval must be at least 1000ms to avoid overwhelming the server');
+                return;
+            }
+
+            // Request notification permission
+            if (Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+
+            isMonitoring = true;
+            startTime = Date.now();
+            checkCount = 0;
+            previousContent = '';
+            previousHash = '';
+            iframeLoaded = false;
+            
+            elements.startBtn.classList.add('hidden');
+            elements.stopBtn.classList.remove('hidden');
+            elements.status.className = 'status monitoring';
+            elements.status.innerHTML = `🔄 Monitoring active - Checking every ${interval}ms`;
+            elements.changeAlert.classList.add('hidden');
+            
+            addLog(`Started monitoring ${url} every ${interval}ms`, 'success');
+            
+            // Start runtime counter
+            runtimeInterval = setInterval(updateRuntime, 1000);
+            
+            // Perform initial check
+            checkWebsite().then(() => {
+                checkCount++;
+                elements.checkCount.textContent = checkCount;
+            });
+            
+            // Start periodic checking
+            monitorInterval = setInterval(async () => {
+                await checkWebsite();
+                checkCount++;
+                elements.checkCount.textContent = checkCount;
+            }, interval);
+        }
+
+        function stopMonitoring() {
+            if (!isMonitoring) return;
+            
+            isMonitoring = false;
+            clearInterval(monitorInterval);
+            clearInterval(runtimeInterval);
+            if (renderIframe) { renderIframe.remove(); renderIframe = null; iframeLoaded = false; }
+            
+            elements.startBtn.classList.remove('hidden');
+            elements.stopBtn.classList.add('hidden');
+            elements.status.className = 'status stopped';
+            elements.status.innerHTML = '⏸️ Monitoring Stopped';
+            
+            addLog('Monitoring stopped by user', 'info');
+        }
+
+        function testAlert() {
+            addLog('Testing alert sound and notification...', 'info');
+            handleChangeDetected('Test alert - Sound and notification check');
+        }
+
+        function openMock(){
+            window.open('http://localhost:8080/mock-ecav.html','_blank');
+        }
+
+        async function debugContent() {
+            const url = elements.url.value;
+            if (!url) {
+                alert('Please enter a URL first');
+                return;
+            }
+            
+            try {
+                addLog('🔍 Debug: Fetching content for analysis...', 'info');
+                const cacheBuster = `?debug=${Date.now()}`;
+                const response = await fetch(url + cacheBuster, { cache: 'no-cache' });
+                const content = await response.text();
+                
+                addLog(`🔍 Content length: ${content.length}`, 'info');
+                addLog(`🔍 First 200 chars: ${content.substring(0, 200)}...`, 'info');
+                addLog(`🔍 Last 200 chars: ...${content.substring(content.length - 200)}`, 'info');
+                
+                // Check if content contains expected elements
+                const hasHtml = content.toLowerCase().includes('<html');
+                const hasBody = content.toLowerCase().includes('<body');
+                const hasScript = content.toLowerCase().includes('<script');
+                
+                addLog(`🔍 Has HTML: ${hasHtml}, Has BODY: ${hasBody}, Has SCRIPT: ${hasScript}`, 'info');
+                
+                if (previousContent) {
+                    const isIdentical = content === previousContent;
+                    addLog(`🔍 Identical to stored content: ${isIdentical}`, 'info');
+                    if (!isIdentical) {
+                        const sizeDiff = content.length - previousContent.length;
+                        addLog(`🔍 Size difference: ${sizeDiff} characters`, 'info');
+                    }
+                }
+                
+            } catch (error) {
+                addLog(`🔍 Debug error: ${error.message}`, 'error');
+            }
+        }
+
+        // --- Mock server state helpers ---
+        async function refreshServerStateDisplay(){
+            try { const r= await fetch('/__mock/state?_=' + Date.now()); if(!r.ok) return; const j= await r.json(); document.getElementById('serverStateDisplay').textContent = j.state; } catch(e){}
+        }
+        async function setServerState(state){
+            try {
+                const r = await fetch('/__mock/set?state='+state+'&_=' + Date.now());
+                const j = await r.json();
+                addLog(`Server state -> ${j.state}`, 'info');
+                refreshServerStateDisplay();
+            } catch(e){ addLog('Failed to set server state: '+e.message,'error'); }
+        }
+        async function cycleServerState(){
+            const order = ['closed','warning','open'];
+            try { const r= await fetch('/__mock/state?_=' + Date.now()); const j= await r.json(); const idx = order.indexOf(j.state); const next = order[(idx+1)%order.length]; await setServerState(next);} catch(e){ addLog('Cycle failed','error'); }
+        }
+        setInterval(refreshServerStateDisplay, 5000);
+        refreshServerStateDisplay();
+
+        // Event listeners
+        elements.startBtn.addEventListener('click', startMonitoring);
+        elements.stopBtn.addEventListener('click', stopMonitoring);
+
+        // Initialize
+    addLog('Website monitor ready (hash-based detection active)', 'success');
+    </script>
+</body>
+</html>

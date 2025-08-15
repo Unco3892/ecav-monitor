@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Website - Registration Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .closed {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+        .open {
+            background-color: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+        .control {
+            background-color: #e8f4f8;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #007bff;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>University Registration Test Site</h1>
+        
+        <div id="status" class="status closed">
+            Registration is currently CLOSED
+        </div>
+        
+        <div class="info">
+            <h3>📋 Registration Information</h3>
+            <p><strong>Next session:</strong> October 8, 2025</p>
+            <p><strong>Registration period:</strong> <span id="period">August 18 - September 8, 2025</span></p>
+            <p><strong>Last updated:</strong> <span id="timestamp"></span></p>
+        </div>
+        
+        <div class="control">
+            <h3>🔧 Test Controls</h3>
+            <p>Use these buttons to simulate registration changes for testing:</p>
+            <button onclick="openRegistration()">✅ Open Registration</button>
+            <button onclick="closeRegistration()">❌ Close Registration</button>
+            <button onclick="updateContent()">📝 Minor Content Update</button>
+            <button onclick="addFormLink()">📋 Add Registration Form</button>
+        </div>
+        
+        <div id="form-section" style="display: none;">
+            <div class="status open">
+                🎉 REGISTRATION IS NOW OPEN! 🎉
+            </div>
+            <div style="text-align: center; margin: 20px 0;">
+                <a href="#" style="display: inline-block; background-color: #28a745; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-size: 18px;">
+                    📝 Registration Form Available
+                </a>
+            </div>
+        </div>
+        
+        <div class="info">
+            <h3>🧪 How to Test</h3>
+            <ol>
+                <li>Start the monitor pointing to this page</li>
+                <li>Click the buttons above to simulate changes</li>
+                <li>Watch the monitor detect the changes</li>
+                <li>Test different scenarios (open/close registration, etc.)</li>
+            </ol>
+            <p><strong>URL for monitor:</strong> <code>http://localhost:3001/</code></p>
+        </div>
+    </div>
+
+    <script>
+        function updateTimestamp() {
+            document.getElementById('timestamp').textContent = new Date().toLocaleString();
+        }
+
+        function openRegistration() {
+            document.getElementById('status').className = 'status open';
+            document.getElementById('status').textContent = 'Registration is now OPEN!';
+            document.getElementById('period').textContent = 'Open now through September 8, 2025';
+            document.getElementById('form-section').style.display = 'block';
+            updateTimestamp();
+            
+            // Add keywords that the monitor looks for
+            document.title = 'Registration OPEN - Apply Now!';
+        }
+
+        function closeRegistration() {
+            document.getElementById('status').className = 'status closed';
+            document.getElementById('status').textContent = 'Registration is currently CLOSED';
+            document.getElementById('period').textContent = 'August 18 - September 8, 2025';
+            document.getElementById('form-section').style.display = 'none';
+            updateTimestamp();
+            
+            document.title = 'Test Website - Registration Status';
+        }
+
+        function updateContent() {
+            // Make a small content change
+            const info = document.querySelector('.info p');
+            const now = new Date();
+            info.innerHTML = `<strong>Next session:</strong> October 8, 2025 (Updated: ${now.toLocaleTimeString()})`;
+            updateTimestamp();
+        }
+
+        function addFormLink() {
+            // Add registration keywords to trigger the monitor
+            const container = document.querySelector('.container');
+            const newDiv = document.createElement('div');
+            newDiv.innerHTML = `
+                <div style="background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 20px 0; text-align: center;">
+                    <strong>🎉 Les inscriptions sont ouvertes!</strong><br>
+                    <a href="#">Formulaire d'inscription disponible</a>
+                </div>
+            `;
+            container.appendChild(newDiv);
+            updateTimestamp();
+        }
+
+        // Initialize
+        updateTimestamp();
+        
+        // Auto-update timestamp every 30 seconds to simulate activity
+        setInterval(updateTimestamp, 30000);
+    </script>
+</body>
+</html>
